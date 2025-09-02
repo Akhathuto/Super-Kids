@@ -7,6 +7,9 @@
 export interface Example {
   title: string;
   url: string;
+  subject: string;
+  ageRange: string;
+  grade: string;
   spec: string;
   code: string;
 }

@@ -1,22 +1,23 @@
 # Super Kids by Edgtec
 
-Turn any fun video into a super learning game! Super Kids uses the power of AI to analyze YouTube videos and automatically generate simple, interactive web games that help children learn and play with their favorite topics.
+Explore a world of learning and fun! Super Kids by Edgtec transforms curated educational videos into simple, interactive web games. It's a magical way for children to play and learn with their favorite topics.
 
 ## How It Works
 
-1.  **Find a Video**: Grab the URL of a fun and educational YouTube video.
-2.  **Paste the Link**: Paste the video link into the Super Kids app.
-3.  **Create Game!**: Click the "Create Game!" button.
-4.  **AI Magic**: The Google Gemini API watches and understands the video's content. It then designs a unique learning game based on the key concepts from the video.
-5.  **Play & Learn**: An interactive game is instantly generated for your child to play!
+1.  **Filter & Explore**: Select your child's age group or grade level, and pick a subject like "Science," "Math," or "Arts & Crafts" from the tabs. The video feed will instantly update to show the most relevant content.
+2.  **Pick a Video**: Browse the curated library of fun and educational YouTube videos and click on one that looks interesting!
+3.  **AI Magic**: The Google Gemini API instantly gets to work, watching and understanding the video's content to design a unique learning game based on its key concepts.
+4.  **Play & Learn**: An interactive game is automatically generated for your child to play and explore!
 
 ## Features
 
+-   **Subject-Based Learning**: Content is organized into clear, intuitive subject tabs (e.g., Science, Math, English, Geography).
+-   **Age & Grade Filtering**: Easily find age-appropriate content using the simple dropdown filters for age ranges (e.g., "3-5", "6-8") and grade levels (e.g., "Preschool", "K-2").
+-   **Curated Video Feed**: A safe, engaging, and categorized library of videos for kids of all ages.
 -   **AI-Powered Game Generation**: Leverages the Gemini API to create relevant and engaging learning experiences from video content.
 -   **Interactive 'Play' Tab**: The main tab where kids can play the generated game directly in the browser.
 -   **'Code' Tab**: For curious kids and parents, this tab shows the complete HTML, CSS, and JavaScript code for the generated game. It's a great way to peek under the hood!
 -   **'Instructions' Tab**: This tab displays the "spec" or design document that the AI created after watching the video, outlining the rules and structure of the game it's about to build.
--   **Example Gallery**: A curated list of pre-analyzed videos provides instant fun and demonstrates the app's capabilities.
 
 ## Technology Stack
 
