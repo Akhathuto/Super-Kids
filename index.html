@@ -25,18 +25,12 @@
         }
       }
     </script>
-    <script type="application/javascript">
-      if (window.location.hostname === "localhost") {
-        let GEMINI_API_KEY = localStorage.getItem("GEMINI_API_KEY");
-        if (!GEMINI_API_KEY) {
-          GEMINI_API_KEY = prompt("Please enter your API key from AI Studio:");
-          if (GEMINI_API_KEY) {
-            localStorage.setItem("GEMINI_API_KEY", GEMINI_API_KEY);
-          }
-        }
-        globalThis.process = { env: { GEMINI_API_KEY: GEMINI_API_KEY } };
-      }
-    </script>
+    <!--
+      The application requires a Google Gemini API key to be provided as process.env.API_KEY.
+      For local development, you can create a file named `env.js` in the root folder and
+      uncomment the script tag below. See README.md for more details.
+    -->
+    <!-- <script src="/env.js"></script> -->
     <link rel="stylesheet" href="/index.css">
   </head>
 
