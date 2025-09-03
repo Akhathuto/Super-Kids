@@ -6,7 +6,7 @@
 
 import {DataContext} from '@/context';
 import {Example} from '@/lib/types';
-import {useContext} from 'react';
+import {useContext, type KeyboardEvent} from 'react';
 
 interface ExampleGalleryProps {
   videos: Example[];
@@ -27,6 +27,17 @@ export default function ExampleGallery({
     return videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : '';
   };
 
+  const handleKeyDown = (
+    event: KeyboardEvent<HTMLDivElement>,
+    example: Example,
+  ) => {
+    // Trigger on 'Enter' or 'Space' key
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault(); // Prevent default action (e.g., scrolling)
+      onSelectVideo(example);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="message-container">
@@ -38,8 +49,8 @@ export default function ExampleGallery({
   if (videos.length === 0) {
     return (
       <div className="message-container">
-        <p>No videos found for these filters!</p>
-        <p>Try selecting a different age, grade, or subject.</p>
+        <p>No videos found!</p>
+        <p>Try changing your search or filters.</p>
       </div>
     );
   }
@@ -52,6 +63,7 @@ export default function ExampleGallery({
             key={example.title}
             className="gallery-item"
             onClick={() => onSelectVideo(example)}
+            onKeyDown={(e) => handleKeyDown(e, example)}
             role="button"
             tabIndex={0}
             aria-label={`Select video: ${example.title}`}>
@@ -96,9 +108,15 @@ export default function ExampleGallery({
           box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
-        .gallery-item:hover {
+        .gallery-item:hover,
+        .gallery-item:focus {
           transform: translateY(-6px) scale(1.03);
           box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .gallery-item:focus {
+          outline: 3px solid var(--color-accent);
+          outline-offset: 2px;
         }
         
         .gallery-item:hover .play-icon-overlay {

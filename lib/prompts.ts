@@ -26,4 +26,4 @@ Provide the result as a JSON object containing a single field called "spec", who
 export const CODE_REGION_OPENER = '```';
 export const CODE_REGION_CLOSER = '```';
 
-export const SPEC_ADDENDUM = `\n\nThe app must be fully responsive and function properly on both desktop and mobile. Provide the code as a single, self-contained HTML document. All styles and scripts must be inline. In the result, encase the code between "${CODE_REGION_OPENER}" and "${CODE_REGION_CLOSER}" for easy parsing.`;
+export const SPEC_ADDENDUM = `\n\nThe app must be fully responsive and function properly on both desktop and mobile. The app should handle potential errors gracefully. For example, if audio playback fails, it should display a non-blocking message to the user instead of using alert(). Provide the code as a single, self-contained HTML document. All styles and scripts must be inline. In the result, encase the code between "${CODE_REGION_OPENER}" and "${CODE_REGION_CLOSER}" for easy parsing.`;

@@ -7,9 +7,11 @@
 import ContentContainer from '@/components/ContentContainer';
 import ExampleGallery from '@/components/ExampleGallery';
 import {DataContext} from '@/context';
+import {playSound} from '@/lib/audio';
 import {Example} from '@/lib/types';
 import {getYoutubeEmbedUrl} from '@/lib/youtube';
-import {useContext, useMemo, useRef, useState} from 'react';
+// FIX: Import React to use React types like CSSProperties and FormEvent.
+import React, {useContext, useMemo, useRef, useState} from 'react';
 
 // Whether to pre-seed with example content
 const PRESEED_CONTENT = false;
@@ -24,6 +26,8 @@ export default function App() {
   const [activeSubject, setActiveSubject] = useState('All');
   const [selectedAge, setSelectedAge] = useState('All Ages');
   const [selectedGrade, setSelectedGrade] = useState('All Grades');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeChannel, setActiveChannel] = useState('All Channels');
 
   const contentContainerRef = useRef<{
     getSpec: () => string;
@@ -40,23 +44,50 @@ export default function App() {
   ];
   const ageRanges = ['All Ages', '3-5', '6-8', '9-12'];
   const grades = ['All Grades', 'Preschool', 'K-2', '3-5'];
+  const channels = [
+    'All Channels',
+    'Art for Kids Hub',
+    'Blippi',
+    'Cosmic Kids Yoga',
+    'GoldieBlox',
+    'Homeschool Pop',
+    'Jack Hartmann Kids Music Channel',
+    'Numberblocks',
+    'SciShow Kids',
+    'Story Time',
+  ];
 
   const filteredVideos = useMemo(() => {
     return examples.filter((video) => {
       const subjectMatch =
         activeSubject === 'All' || video.subject === activeSubject;
-      const ageMatch = selectedAge === 'All Ages' || video.ageRange === selectedAge;
+      const ageMatch =
+        selectedAge === 'All Ages' || video.ageRange === selectedAge;
       const gradeMatch =
         selectedGrade === 'All Grades' || video.grade === selectedGrade;
-      return subjectMatch && ageMatch && gradeMatch;
+      const channelMatch =
+        activeChannel === 'All Channels' || video.channel === activeChannel;
+      const searchMatch =
+        searchQuery.trim() === '' ||
+        video.title.toLowerCase().includes(searchQuery.toLowerCase());
+      return subjectMatch && ageMatch && gradeMatch && searchMatch && channelMatch;
     });
-  }, [examples, activeSubject, selectedAge, selectedGrade]);
+  }, [
+    examples,
+    activeSubject,
+    selectedAge,
+    selectedGrade,
+    searchQuery,
+    activeChannel,
+  ]);
 
   const handleExampleSelect = (example: Example) => {
+    playSound('audio-select');
     setSelectedVideo(example);
   };
 
   const handleGoBack = () => {
+    playSound('audio-back');
     setSelectedVideo(null);
   };
 
@@ -65,14 +96,46 @@ export default function App() {
     setContentLoading(isLoading);
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    playSound('audio-click');
+    // Filtering is reactive to the searchQuery state, this just prevents submission.
+  };
+
   // The main view of the app: A welcoming feed of videos.
   const VideoFeedView = (
     <div className="feed-view-container">
-      <h1 className="headline">Super Kids</h1>
+      <h1 className="headline" aria-label="Super Kids">
+        {'Super Kids'.split('').map((char, index) => (
+          <span
+            key={index}
+            className="headline-char"
+            // FIX: Cast style object to React.CSSProperties to allow for custom properties.
+            style={{'--char-index': index} as React.CSSProperties}>
+            {char === ' ' ? '\u00A0' : char}
+          </span>
+        ))}
+      </h1>
       <p className="subtitle">Turn fun videos into super learning games!</p>
       <p className="attribution">
         by <strong>Edgtec</strong>
       </p>
+
+      <form className="search-container" onSubmit={handleSearch}>
+        <input
+          type="search"
+          id="video-search"
+          placeholder="Search for videos like 'taco' or 'space'..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          aria-label="Search for educational videos"
+        />
+        <button type="submit" aria-label="Search">
+          <span className="back-button-icon" aria-hidden="true">
+            search
+          </span>
+        </button>
+      </form>
 
       <div className="filters-and-tabs-container">
         {/* Filters */}
@@ -82,7 +145,10 @@ export default function App() {
             <select
               id="age-filter"
               value={selectedAge}
-              onChange={(e) => setSelectedAge(e.target.value)}>
+              onChange={(e) => {
+                playSound('audio-click');
+                setSelectedAge(e.target.value);
+              }}>
               {ageRanges.map((age) => (
                 <option key={age} value={age}>
                   {age}
@@ -95,7 +161,10 @@ export default function App() {
             <select
               id="grade-filter"
               value={selectedGrade}
-              onChange={(e) => setSelectedGrade(e.target.value)}>
+              onChange={(e) => {
+                playSound('audio-click');
+                setSelectedGrade(e.target.value);
+              }}>
               {grades.map((grade) => (
                 <option key={grade} value={grade}>
                   {grade}
@@ -105,16 +174,46 @@ export default function App() {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="tabs-container">
+        {/* Subject Tabs */}
+        <div
+          className="tabs-container"
+          role="tablist"
+          aria-label="Filter by subject">
           {subjects.map((subject) => (
             <button
               key={subject}
+              role="tab"
+              aria-selected={activeSubject === subject}
               className={`tab-button ${
                 activeSubject === subject ? 'active' : ''
               }`}
-              onClick={() => setActiveSubject(subject)}>
+              onClick={() => {
+                playSound('audio-tab');
+                setActiveSubject(subject);
+              }}>
               {subject}
+            </button>
+          ))}
+        </div>
+
+        {/* Channel Tabs */}
+        <div
+          className="tabs-container channel-tabs-container"
+          role="tablist"
+          aria-label="Filter by channel">
+          {channels.map((channel) => (
+            <button
+              key={channel}
+              role="tab"
+              aria-selected={activeChannel === channel}
+              className={`tab-button ${
+                activeChannel === channel ? 'active' : ''
+              }`}
+              onClick={() => {
+                playSound('audio-tab');
+                setActiveChannel(channel);
+              }}>
+              {channel}
             </button>
           ))}
         </div>
@@ -272,25 +371,6 @@ export default function App() {
         }
 
         /* Header Styles */
-        .headline {
-          color: var(--color-headline);
-          font-family: var(--font-display);
-          font-size: 4.5rem;
-          font-weight: 400;
-          margin-top: 0.5rem;
-          margin-bottom: 0;
-          text-align: center;
-          text-transform: uppercase;
-          letter-spacing: 2px;
-          -webkit-text-stroke: 2px #fff;
-          paint-order: stroke fill;
-
-          @media (max-width: 768px) {
-            font-size: 3rem;
-            -webkit-text-stroke: 1px #fff;
-          }
-        }
-
         .subtitle {
           color: var(--color-subtitle);
           font-size: 1.25rem;
@@ -309,14 +389,37 @@ export default function App() {
           font-family: var(--font-secondary);
           font-size: 0.9rem;
           font-style: italic;
-          margin-bottom: 2.5rem;
+          margin-bottom: 1rem;
           margin-top: -1rem;
           text-align: center;
 
           @media (max-width: 768px) {
             font-size: 0.8rem;
-            margin-bottom: 2rem;
           }
+        }
+
+        /* Search Styles */
+        .search-container {
+          display: flex;
+          gap: 0.5rem;
+          max-width: 600px;
+          margin: 0 auto 2.5rem auto;
+        }
+        
+        .search-container input {
+          flex-grow: 1;
+          font-size: 1.125rem;
+          padding: 0.8rem 1.25rem;
+          border-radius: 99px;
+        }
+        
+        .search-container button {
+          border-radius: 99px;
+          padding: 0.8rem;
+          aspect-ratio: 1/1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         /* Filters and Tabs Styles */

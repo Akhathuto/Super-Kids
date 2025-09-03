@@ -9,8 +9,6 @@ import {
   GenerateContentConfig,
   GenerateContentParameters,
   GoogleGenAI,
-  HarmBlockThreshold,
-  HarmCategory,
   Part,
   SafetySetting,
 } from '@google/genai';
@@ -32,7 +30,7 @@ interface GenerateTextOptions {
 export async function generateText(
   options: GenerateTextOptions,
 ): Promise<string> {
-  const {modelName, prompt, videoUrl, temperature = 0.75} = options;
+  const {modelName, prompt, videoUrl, temperature = 0.75, safetySettings} = options;
 
   // FIX: The API key must be obtained exclusively from `process.env.API_KEY`
   // and passed as a named parameter. The explicit check for the key is removed
@@ -55,8 +53,10 @@ export async function generateText(
     }
   }
 
+  // FIX: `safetySettings` must be passed within the `config` object, not as a top-level property in `GenerateContentParameters`.
   const generationConfig: GenerateContentConfig = {
     temperature,
+    safetySettings,
   };
 
   const request: GenerateContentParameters = {

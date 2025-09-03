@@ -7,6 +7,7 @@
 import Editor from '@monaco-editor/react';
 import React, {
   forwardRef,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useState,
@@ -15,6 +16,7 @@ import {Tab, TabList, TabPanel, Tabs} from 'react-tabs';
 
 // import 'react-tabs/style/react-tabs.css'
 
+import {playSound} from '@/lib/audio';
 import {parseHTML, parseJSON} from '@/lib/parse';
 import {
   CODE_REGION_CLOSER,
@@ -32,6 +34,21 @@ interface ContentContainerProps {
 }
 
 type LoadingState = 'loading-spec' | 'loading-code' | 'ready' | 'error';
+
+// Helper function to provide more user-friendly error messages.
+const getFriendlyErrorMessage = (error: string | null): string => {
+  if (!error) {
+    return 'Our robots hit a little snag. Please try again!';
+  }
+  if (error.includes('SAFETY') || error.includes('blocked')) {
+    return "The content couldn't be created for this video. This can sometimes happen due to safety filters. Please try a different video.";
+  }
+  if (error.includes('API key')) {
+    return 'There seems to be an issue with the connection. Please check your setup and try again.';
+  }
+  // Generic fallback.
+  return 'Our robots got a little stuck building the game. Would you like to try again?';
+};
 
 // Export the ContentContainer component as a forwardRef component
 export default forwardRef(function ContentContainer(
@@ -77,7 +94,7 @@ export default forwardRef(function ContentContainer(
   };
 
   // Helper function to generate code from content spec
-  const generateCodeFromSpec = async (spec: string): Promise<string> => {
+  const generateCodeFromSpec = useCallback(async (spec: string): Promise<string> => {
     // FIX: Use a recommended model 'gemini-2.5-flash' instead of a deprecated/prohibited one.
     const codeResponse = await generateText({
       modelName: 'gemini-2.5-flash',
@@ -90,7 +107,7 @@ export default forwardRef(function ContentContainer(
       CODE_REGION_CLOSER,
     );
     return code;
-  };
+  }, []);
 
   // Propagate loading state changes as a boolean
   useEffect(() => {
@@ -101,47 +118,48 @@ export default forwardRef(function ContentContainer(
     }
   }, [loadingState, onLoadingStateChange]);
 
-  // On mount (or when contentBasis changes), generate a content spec and then use that spec to generate code
-  useEffect(() => {
-    async function generateContent() {
-      // If we have pre-seeded content, skip generation
-      if (preSeededSpec && preSeededCode) {
-        setSpec(preSeededSpec);
-        setCode(preSeededCode);
-        setLoadingState('ready');
-        return;
-      }
-
-      try {
-        // Reset states
-        setLoadingState('loading-spec');
-        setError(null);
-        setSpec('');
-        setCode('');
-
-        // Generate a content spec based on video content
-        const generatedSpec = await generateSpecFromVideo(contentBasis);
-        setSpec(generatedSpec);
-        setLoadingState('loading-code');
-
-        // Generate code using the generated content spec
-        const generatedCode = await generateCodeFromSpec(generatedSpec);
-        setCode(generatedCode);
-        setLoadingState('ready');
-      } catch (err) {
-        console.error(
-          'An error occurred while attempting to generate content:',
-          err,
-        );
-        setError(
-          err instanceof Error ? err.message : 'An unknown error occurred',
-        );
-        setLoadingState('error');
-      }
+  // Main content generation logic, wrapped in useCallback for reuse (e.g., for a retry button).
+  const startGeneration = useCallback(async () => {
+    // If we have pre-seeded content, skip generation
+    if (preSeededSpec && preSeededCode) {
+      setSpec(preSeededSpec);
+      setCode(preSeededCode);
+      setLoadingState('ready');
+      return;
     }
 
-    generateContent();
-  }, [contentBasis, preSeededSpec, preSeededCode]);
+    try {
+      // Reset states
+      setLoadingState('loading-spec');
+      setError(null);
+      setSpec('');
+      setCode('');
+
+      // Generate a content spec based on video content
+      const generatedSpec = await generateSpecFromVideo(contentBasis);
+      setSpec(generatedSpec);
+      setLoadingState('loading-code');
+
+      // Generate code using the generated content spec
+      const generatedCode = await generateCodeFromSpec(generatedSpec);
+      setCode(generatedCode);
+      setLoadingState('ready');
+    } catch (err) {
+      console.error(
+        'An error occurred while attempting to generate content:',
+        err,
+      );
+      setError(
+        err instanceof Error ? err.message : 'An unknown error occurred',
+      );
+      setLoadingState('error');
+    }
+  }, [contentBasis, preSeededSpec, preSeededCode, generateCodeFromSpec]);
+
+  // On mount (or when contentBasis changes), start the generation process.
+  useEffect(() => {
+    startGeneration();
+  }, [startGeneration]);
 
   // Re-render iframe when code changes
   useEffect(() => {
@@ -245,6 +263,8 @@ export default forwardRef(function ContentContainer(
         justifyContent: 'center',
         marginTop: '-2.5rem',
         textAlign: 'center',
+        padding: '1rem',
+        boxSizing: 'border-box',
       }}>
       <div
         style={{
@@ -253,14 +273,34 @@ export default forwardRef(function ContentContainer(
         }}>
         error
       </div>
-      <h3 style={{fontSize: '1.5rem', marginBottom: '0.5rem', color: 'var(--color-text)'}}>
-        Uh oh!
+      <h3
+        style={{
+          fontSize: '1.5rem',
+          marginBottom: '0.5rem',
+          color: 'var(--color-text)',
+        }}>
+        Uh oh! Something went wrong.
       </h3>
-      <p style={{color: 'var(--color-text)'}}>
-        Our robots got stuck. Try a different video link!
+      <p
+        style={{
+          color: 'var(--color-text)',
+          marginBottom: '1.5rem',
+          maxWidth: '80%',
+        }}>
+        {getFriendlyErrorMessage(error)}
       </p>
-      <p style={{marginTop: '0.5rem', color: 'var(--color-text)'}}>
-        ({error || 'Something went wrong'})
+      <button onClick={startGeneration} className="button-primary">
+        Try Again
+      </button>
+      <p
+        style={{
+          marginTop: '1.5rem',
+          fontSize: '0.8em',
+          color: '#999',
+          maxWidth: '90%',
+          wordBreak: 'break-word',
+        }}>
+        <strong>Details:</strong> {error || 'An unknown error occurred.'}
       </p>
     </div>
   );
@@ -370,7 +410,8 @@ export default forwardRef(function ContentContainer(
               style={{
                 fontFamily: 'var(--font-symbols)',
                 fontSize: '1.125rem',
-              }}>
+              }}
+              aria-hidden="true">
               edit
             </span>
           </button>
@@ -407,6 +448,7 @@ export default forwardRef(function ContentContainer(
         }}
         selectedIndex={activeTabIndex}
         onSelect={(index) => {
+          playSound('audio-tab');
           // If currently editing spec and switching away from spec tab
           if (isEditingSpec && index !== 2) {
             setIsEditingSpec(false); // Exit edit mode

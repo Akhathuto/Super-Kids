@@ -4,15 +4,18 @@ Explore a world of learning and fun! Super Kids by Edgtec transforms curated edu
 
 ## How It Works
 
-1.  **Filter & Explore**: Select your child's age group or grade level, and pick a subject like "Science," "Math," or "Arts & Crafts" from the tabs. The video feed will instantly update to show the most relevant content.
+1.  **Search & Filter**: Use the search bar to look for topics like "space" or "drawing". You can also filter content by your child's age group or grade level, pick a subject like "Science" or "Math," or select a favorite YouTube channel. The video feed will instantly update to show the most relevant content.
 2.  **Pick a Video**: Browse the curated library of fun and educational YouTube videos and click on one that looks interesting!
 3.  **AI Magic**: The Google Gemini API instantly gets to work, watching and understanding the video's content to design a unique learning game based on its key concepts.
 4.  **Play & Learn**: An interactive game is automatically generated for your child to play and explore!
 
 ## Features
 
+-   **YouTube Search Bar**: Quickly find videos on specific topics by searching the curated library.
 -   **Subject-Based Learning**: Content is organized into clear, intuitive subject tabs (e.g., Science, Math, English, Geography).
+-   **Channel-Based Filtering**: Browse videos from a curated list of kid-friendly YouTube channels like SciShow Kids, Blippi, Cosmic Kids Yoga, Art for Kids Hub, and more.
 -   **Age & Grade Filtering**: Easily find age-appropriate content using the simple dropdown filters for age ranges (e.g., "3-5", "6-8") and grade levels (e.g., "Preschool", "K-2").
+-   **Engaging Sound Effects**: Fun and friendly audio feedback for interactions like clicks, tab selections, and choosing videos.
 -   **Curated Video Feed**: A safe, engaging, and categorized library of videos for kids of all ages.
 -   **AI-Powered Game Generation**: Leverages the Gemini API to create relevant and engaging learning experiences from video content.
 -   **Interactive 'Play' Tab**: The main tab where kids can play the generated game directly in the browser.
